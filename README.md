@@ -199,7 +199,7 @@ Este proyecto está bajo la Licencia MIT. Para más detalles, consulta el archiv
 Para cualquier consulta o sugerencia, por favor contacta a:
 
 - **Nombre**: Hugo
-- **Correo Electrónico**: hugo@example.com
+- **Correo Electrónico**: hugoperez510@hotmail.com
 
 ---
 
