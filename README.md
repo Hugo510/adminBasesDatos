@@ -172,6 +172,68 @@ El script `populate.py` genera datos simulados para las siguientes tablas:
     - **Campos**: `id`, `fk_material`, `fk_producto`, `cantidad`, `created_at`, `updated_at`.
     - **Cantidad de Registros**: 700
 
+## Mejoras Implementadas en `insert.py`
+
+### Estructura Modular
+
+El script `insert.py` ha sido refactorizado para mejorar la legibilidad y la mantenibilidad del código mediante la encapsulación de la lógica principal en funciones reutilizables:
+
+- `get_connection_params()`: Obtiene los parámetros de conexión a la base de datos.
+- `get_files_and_tables()`: Mapea los archivos CSV a sus correspondientes tablas en la base de datos.
+- `load_csv_to_db(conn, file_path, table)`: Gestiona la carga de un archivo CSV específico en una tabla de la base de datos.
+- `main()`: Función principal que orquesta la conexión a la base de datos y la carga de los datos.
+
+### Anotaciones de Tipo
+
+Se han añadido anotaciones de tipo para mejorar la claridad del código y facilitar el mantenimiento:
+
+```python
+def get_connection_params() -> Dict[str, any]:
+def get_files_and_tables() -> Dict[str, str]:
+def load_csv_to_db(conn, file_path: Path, table: str) -> None:
+def main() -> None:
+```
+
+### Validación de Archivos CSV
+
+Antes de intentar cargar los datos, el script verifica la existencia de cada archivo CSV, lo que previene errores en tiempo de ejecución si algún archivo está ausente.
+
+### Manejo de Excepciones Específicas
+
+El manejo de excepciones se ha mejorado para capturar y gestionar errores más detallados:
+
+- `FileNotFoundError`: Capturado cuando un archivo CSV no existe.
+- `psycopg2.Error`: Captura errores específicos relacionados con la base de datos.
+- `psycopg2.OperationalError`: Maneja errores de conexión a la base de datos.
+- Excepciones generales: Captura cualquier otro tipo de error inesperado.
+
+### Uso de `pathlib`
+
+Se ha adoptado la biblioteca `pathlib` para una gestión más eficiente y moderna de las rutas de archivo, reemplazando el uso de `os.path`:
+
+```python
+from pathlib import Path
+```
+
+### Configuración Avanzada de Logging
+
+El sistema de logging ha sido mejorado para registrar eventos en un archivo de log (`database_insert.log`), ofreciendo un seguimiento más detallado de las operaciones y facilitando la depuración:
+
+```python
+logging.basicConfig(
+    filename='database_insert.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+```
+
+### Beneficios de las Mejoras
+
+- **Legibilidad y Mantenibilidad**: La estructura modular y las anotaciones de tipo hacen que el código sea más fácil de entender y mantener.
+- **Robustez**: La validación de archivos y el manejo de excepciones específicas aumentan la confiabilidad del script.
+- **Eficiencia**: El uso de `pathlib` simplifica la gestión de rutas de archivo.
+- **Trazabilidad**: El logging detallado permite un seguimiento efectivo de las operaciones y facilita la identificación y resolución de problemas.
+
 ## Buenas Prácticas Implementadas
 
 - **Modularidad**: Separación de la lógica en funciones reutilizables (`random_timestamp` y `create_dataframe`).
