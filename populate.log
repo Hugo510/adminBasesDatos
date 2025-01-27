@@ -1,0 +1,15 @@
+2025-01-26 18:27:26,408 - INFO - Inicio de la generación de datos.
+2025-01-26 18:27:26,435 - INFO - Archivo Materiales.csv creado exitosamente.
+2025-01-26 18:27:26,444 - INFO - Archivo Productos.csv creado exitosamente.
+2025-01-26 18:27:26,449 - INFO - Archivo Flujos.csv creado exitosamente.
+2025-01-26 18:27:26,460 - INFO - Archivo Niveles.csv creado exitosamente.
+2025-01-26 18:27:26,466 - INFO - Archivo Maquinas.csv creado exitosamente.
+2025-01-26 18:27:26,487 - INFO - Archivo Licencias.csv creado exitosamente.
+2025-01-26 18:27:26,498 - INFO - Archivo Empleados.csv creado exitosamente.
+2025-01-26 18:27:26,513 - INFO - Archivo Operadores_Licencias.csv creado exitosamente.
+2025-01-26 18:27:26,530 - INFO - Archivo Producciones.csv creado exitosamente.
+2025-01-26 18:27:26,543 - INFO - Archivo Metas.csv creado exitosamente.
+2025-01-26 18:27:26,555 - INFO - Archivo Producciones_Detalles.csv creado exitosamente.
+2025-01-26 18:27:26,566 - INFO - Archivo Materiales_Productos.csv creado exitosamente.
+2025-01-26 18:27:26,566 - INFO - Generación de datos completada.
+2025-01-26 18:27:26,566 - INFO - Cantidad de registros generados: {'Materiales': 700, 'Productos': 700, 'Flujos': 10, 'Niveles': 20, 'Maquinas': 100, 'Licencias': 700, 'Empleados': 700, 'Operadores_Licencias': 700, 'Producciones': 700, 'Metas': 700, 'Producciones_Detalles': 700, 'Materiales_Productos': 700}

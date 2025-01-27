@@ -181,6 +181,7 @@ El script `insert.py` ha sido refactorizado para mejorar la legibilidad y la man
 - `get_connection_params()`: Obtiene los parámetros de conexión a la base de datos.
 - `get_files_and_tables()`: Mapea los archivos CSV a sus correspondientes tablas en la base de datos.
 - `load_csv_to_db(conn, file_path, table)`: Gestiona la carga de un archivo CSV específico en una tabla de la base de datos.
+- `initialize_connection_pool()`: Inicializa un pool de conexiones para manejar eficientemente múltiples conexiones.
 - `main()`: Función principal que orquesta la conexión a la base de datos y la carga de los datos.
 
 ### Anotaciones de Tipo
@@ -188,9 +189,10 @@ El script `insert.py` ha sido refactorizado para mejorar la legibilidad y la man
 Se han añadido anotaciones de tipo para mejorar la claridad del código y facilitar el mantenimiento:
 
 ```python
-def get_connection_params() -> Dict[str, any]:
+def get_connection_params() -> Dict[str, Any]:
 def get_files_and_tables() -> Dict[str, str]:
 def load_csv_to_db(conn, file_path: Path, table: str) -> None:
+def initialize_connection_pool(minconn: int = 1, maxconn: int = 10) -> Optional[pool.SimpleConnectionPool]:
 def main() -> None:
 ```
 
@@ -227,12 +229,21 @@ logging.basicConfig(
 )
 ```
 
+### Pool de Conexiones
+
+Se ha implementado un pool de conexiones utilizando `psycopg2.pool.SimpleConnectionPool` para manejar múltiples conexiones de manera eficiente y reducir la sobrecarga de establecer conexiones repetidamente.
+
+### Manejo de Recursos
+
+Se asegura el cierre adecuado de recursos mediante el uso de gestores de contexto (`with`), lo que previene fugas de recursos y garantiza que las conexiones y archivos se cierren correctamente incluso en caso de errores.
+
 ### Beneficios de las Mejoras
 
 - **Legibilidad y Mantenibilidad**: La estructura modular y las anotaciones de tipo hacen que el código sea más fácil de entender y mantener.
 - **Robustez**: La validación de archivos y el manejo de excepciones específicas aumentan la confiabilidad del script.
-- **Eficiencia**: El uso de `pathlib` simplifica la gestión de rutas de archivo.
+- **Eficiencia**: El uso de `pathlib` y un pool de conexiones simplifica la gestión de rutas y mejora el rendimiento al manejar conexiones.
 - **Trazabilidad**: El logging detallado permite un seguimiento efectivo de las operaciones y facilita la identificación y resolución de problemas.
+- **Escalabilidad**: La modularidad y el manejo eficiente de conexiones permiten que el sistema escale fácilmente para manejar mayores volúmenes de datos.
 
 ## Buenas Prácticas Implementadas
 

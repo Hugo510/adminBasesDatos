@@ -2,7 +2,8 @@ import psycopg2
 # import os  # Eliminado si no se usa en otra parte
 import logging
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Any, Optional
+from psycopg2 import pool
 
 # Configuración de logging
 logging.basicConfig(
@@ -11,12 +12,12 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 
-def get_connection_params() -> Dict[str, any]:
+def get_connection_params() -> Dict[str, Any]:
     """
     Devuelve los parámetros de conexión a la base de datos PostgreSQL.
     
     Returns:
-        Dict[str, any]: Diccionario con los parámetros de conexión.
+        Dict[str, Any]: Diccionario con los parámetros de conexión.
     """
     return {
         "dbname": "tu_base_de_datos",
@@ -62,33 +63,68 @@ def load_csv_to_db(conn, file_path: Path, table: str) -> None:
         with file_path.open("r", encoding="utf-8") as f:
             # Salta la cabecera del CSV
             next(f)
-            conn.cursor().copy_expert(f"COPY {table} FROM STDIN WITH CSV HEADER", f)
+            cur = conn.cursor()
+            cur.copy_expert(f"COPY {table} FROM STDIN WITH CSV HEADER", f)
+            cur.close()
         logging.info(f"Datos cargados correctamente en {table}.")
     except FileNotFoundError:
         logging.error(f"El archivo {file_path} no existe.")
     except psycopg2.Error as db_err:
         logging.error(f"Error al cargar datos en {table}: {db_err}")
 
+def initialize_connection_pool(minconn: int = 1, maxconn: int = 10) -> Optional[pool.SimpleConnectionPool]:
+    """
+    Inicializa un pool de conexiones a la base de datos.
+    
+    Args:
+        minconn (int): Número mínimo de conexiones en el pool.
+        maxconn (int): Número máximo de conexiones en el pool.
+    
+    Returns:
+        Optional[pool.SimpleConnectionPool]: Pool de conexiones o None en caso de error.
+    """
+    conn_params = get_connection_params()
+    try:
+        connection_pool = psycopg2.pool.SimpleConnectionPool(
+            minconn,
+            maxconn,
+            **conn_params
+        )
+        if connection_pool:
+            logging.info("Pool de conexiones creado exitosamente.")
+            return connection_pool
+    except psycopg2.Error as e:
+        logging.error(f"Error al crear el pool de conexiones: {e}")
+    return None
+
 def main() -> None:
     """
     Función principal que gestiona la conexión a la base de datos y la carga de datos desde CSV.
     """
-    conn_params = get_connection_params()
+    connection_pool = initialize_connection_pool()
+    if not connection_pool:
+        logging.error("No se pudo establecer el pool de conexiones. Terminando el proceso.")
+        return
+
     csv_path = Path("./data/")
     files_and_tables = get_files_and_tables()
-    
+    record_counts = {}
+
     try:
-        # Establecer conexión usando gestor de contexto
-        with psycopg2.connect(**conn_params) as conn:
-            with conn.cursor() as cursor:
-                for filename, table in files_and_tables.items():
-                    file_path = csv_path / filename
-                    load_csv_to_db(conn, file_path, table)
-        # No es necesario conn.commit() cuando se usa el gestor de contexto
-    except psycopg2.OperationalError as op_err:
-        logging.error(f"Error de conexión a la base de datos: {op_err}")
-    except Exception as e:
-        logging.error(f"Error inesperado durante la carga: {e}")
+        conn = connection_pool.getconn()
+        if conn:
+            with conn:
+                with conn.cursor() as cursor:
+                    for filename, table in files_and_tables.items():
+                        file_path = csv_path / filename
+                        load_csv_to_db(conn, file_path, table)
+                        # Opcional: Contar registros insertados si es necesario
+            connection_pool.putconn(conn)
+    except psycopg2.Error as e:
+        logging.error(f"Error durante la inserción de datos: {e}")
+    finally:
+        connection_pool.closeall()
+        logging.info("Pool de conexiones cerrado.")
 
 if __name__ == "__main__":
     main()
