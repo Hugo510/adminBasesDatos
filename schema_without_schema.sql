@@ -1,9 +1,7 @@
+CREATE DATABASE maquila;
 
-CREATE DATABASE Maquila;
+\connect maquila;
 
-\connect Maquila;
-
--- Materiales
 CREATE TABLE Materiales (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -12,7 +10,6 @@ CREATE TABLE Materiales (
 );
 CREATE INDEX idx_materiales_nombre ON Materiales(nombre);
 
--- Empleados
 CREATE TABLE Empleados (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -23,7 +20,6 @@ CREATE TABLE Empleados (
 );
 CREATE INDEX idx_empleados_nombre ON Empleados(nombre);
 
--- Máquinas
 CREATE TABLE Maquinas (
     no_serie VARCHAR(50) PRIMARY KEY,
     tipo VARCHAR(100) NOT NULL,
@@ -34,7 +30,6 @@ CREATE TABLE Maquinas (
 );
 CREATE INDEX idx_maquinas_tipo ON Maquinas(tipo);
 
--- Productos
 CREATE TABLE Productos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -43,7 +38,6 @@ CREATE TABLE Productos (
 );
 CREATE INDEX idx_productos_nombre ON Productos(nombre);
 
--- Flujos
 CREATE TABLE Flujos (
     id SERIAL PRIMARY KEY,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
@@ -52,7 +46,6 @@ CREATE TABLE Flujos (
 );
 CREATE INDEX idx_flujos_activo ON Flujos(activo);
 
--- Relación Producto-Flujo
 CREATE TABLE Productos_Flujos (
     id SERIAL PRIMARY KEY,
     fk_producto INT NOT NULL,
@@ -65,7 +58,6 @@ CREATE TABLE Productos_Flujos (
 CREATE INDEX idx_productos_flujos_producto ON Productos_Flujos(fk_producto);
 CREATE INDEX idx_productos_flujos_flujo ON Productos_Flujos(fk_flujo);
 
--- Niveles de Empleados
 CREATE TABLE Niveles (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -75,7 +67,6 @@ CREATE TABLE Niveles (
 );
 CREATE INDEX idx_niveles_nombre ON Niveles(nombre);
 
--- Licencias
 CREATE TABLE Licencias (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -86,7 +77,6 @@ CREATE TABLE Licencias (
 );
 CREATE INDEX idx_licencias_nombre ON Licencias(nombre);
 
--- Relación Operador-Licencia
 CREATE TABLE Operadores_Licencias (
     id SERIAL PRIMARY KEY,
     fk_empleado INT NOT NULL,
@@ -100,7 +90,6 @@ CREATE TABLE Operadores_Licencias (
 CREATE INDEX idx_operadores_licencias_empleado ON Operadores_Licencias(fk_empleado);
 CREATE INDEX idx_operadores_licencias_licencia ON Operadores_Licencias(fk_licencia);
 
--- Producción
 CREATE TABLE Producciones (
     id SERIAL PRIMARY KEY,
     cantidad_producto INT NOT NULL CHECK (cantidad_producto > 0),
@@ -113,7 +102,6 @@ CREATE TABLE Producciones (
 CREATE INDEX idx_producciones_flujo ON Producciones(fk_flujo);
 CREATE INDEX idx_producciones_fecha ON Producciones(fecha);
 
--- Metas de Producción
 CREATE TABLE Metas (
     id SERIAL PRIMARY KEY,
     unidades INT NOT NULL CHECK (unidades > 0),
@@ -124,7 +112,6 @@ CREATE TABLE Metas (
 );
 CREATE INDEX idx_metas_producto ON Metas(fk_producto);
 
--- Detalle de Producción
 CREATE TABLE Producciones_Detalles (
     id SERIAL PRIMARY KEY,
     fk_produccion INT NOT NULL,
@@ -139,7 +126,6 @@ CREATE TABLE Producciones_Detalles (
 CREATE INDEX idx_producciones_detalles_produccion ON Producciones_Detalles(fk_produccion);
 CREATE INDEX idx_producciones_detalles_meta ON Producciones_Detalles(fk_meta);
 
--- Relación Material-Producto
 CREATE TABLE Materiales_Productos (
     id SERIAL PRIMARY KEY,
     fk_material INT NOT NULL,
