@@ -2,6 +2,7 @@ CREATE DATABASE maquila;
 
 \connect maquila;
 
+-- 1. Materiales
 CREATE TABLE Materiales (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -10,16 +11,35 @@ CREATE TABLE Materiales (
 );
 CREATE INDEX idx_materiales_nombre ON Materiales(nombre);
 
-CREATE TABLE Empleados (
+-- 2. Flujos
+CREATE TABLE Flujos (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    fk_nivel INT NOT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_empleado_nivel FOREIGN KEY (fk_nivel) REFERENCES Niveles(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX idx_empleados_nombre ON Empleados(nombre);
+CREATE INDEX idx_flujos_activo ON Flujos(activo);
 
+-- 3. Niveles
+CREATE TABLE Niveles (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_niveles_nombre ON Niveles(nombre);
+
+-- 4. Productos
+CREATE TABLE Productos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_productos_nombre ON Productos(nombre);
+
+-- 5. Maquinas
 CREATE TABLE Maquinas (
     no_serie VARCHAR(50) PRIMARY KEY,
     tipo VARCHAR(100) NOT NULL,
@@ -30,22 +50,43 @@ CREATE TABLE Maquinas (
 );
 CREATE INDEX idx_maquinas_tipo ON Maquinas(tipo);
 
-CREATE TABLE Productos (
+-- 6. Empleados
+CREATE TABLE Empleados (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    fk_nivel INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_empleado_nivel FOREIGN KEY (fk_nivel) REFERENCES Niveles(id)
 );
-CREATE INDEX idx_productos_nombre ON Productos(nombre);
+CREATE INDEX idx_empleados_nombre ON Empleados(nombre);
 
-CREATE TABLE Flujos (
+-- 7. Metas
+CREATE TABLE Metas (
     id SERIAL PRIMARY KEY,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    unidades INT NOT NULL CHECK (unidades > 0),
+    fk_producto INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_meta_producto FOREIGN KEY (fk_producto) REFERENCES Productos(id)
 );
-CREATE INDEX idx_flujos_activo ON Flujos(activo);
+CREATE INDEX idx_metas_producto ON Metas(fk_producto);
 
+-- 8. Materiales_Productos
+CREATE TABLE Materiales_Productos (
+    id SERIAL PRIMARY KEY,
+    fk_material INT NOT NULL,
+    fk_producto INT NOT NULL,
+    cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_material_producto_material FOREIGN KEY (fk_material) REFERENCES Materiales(id),
+    CONSTRAINT fk_material_producto_producto FOREIGN KEY (fk_producto) REFERENCES Productos(id)
+);
+CREATE INDEX idx_materiales_productos_material ON Materiales_Productos(fk_material);
+CREATE INDEX idx_materiales_productos_producto ON Materiales_Productos(fk_producto);
+
+-- 9. Productos_Flujos
 CREATE TABLE Productos_Flujos (
     id SERIAL PRIMARY KEY,
     fk_producto INT NOT NULL,
@@ -58,15 +99,7 @@ CREATE TABLE Productos_Flujos (
 CREATE INDEX idx_productos_flujos_producto ON Productos_Flujos(fk_producto);
 CREATE INDEX idx_productos_flujos_flujo ON Productos_Flujos(fk_flujo);
 
-CREATE TABLE Niveles (
-    id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL UNIQUE,
-    descripcion VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX idx_niveles_nombre ON Niveles(nombre);
-
+-- 10. Licencias
 CREATE TABLE Licencias (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL UNIQUE,
@@ -77,6 +110,20 @@ CREATE TABLE Licencias (
 );
 CREATE INDEX idx_licencias_nombre ON Licencias(nombre);
 
+-- 11. Producciones
+CREATE TABLE Producciones (
+    id SERIAL PRIMARY KEY,
+    cantidad_producto INT NOT NULL CHECK (cantidad_producto > 0),
+    fk_flujo INT NOT NULL,
+    fecha DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_produccion_flujo FOREIGN KEY (fk_flujo) REFERENCES Flujos(id)
+);
+CREATE INDEX idx_producciones_flujo ON Producciones(fk_flujo);
+CREATE INDEX idx_producciones_fecha ON Producciones(fecha);
+
+-- 12. Operadores_Licencias
 CREATE TABLE Operadores_Licencias (
     id SERIAL PRIMARY KEY,
     fk_empleado INT NOT NULL,
@@ -90,28 +137,7 @@ CREATE TABLE Operadores_Licencias (
 CREATE INDEX idx_operadores_licencias_empleado ON Operadores_Licencias(fk_empleado);
 CREATE INDEX idx_operadores_licencias_licencia ON Operadores_Licencias(fk_licencia);
 
-CREATE TABLE Producciones (
-    id SERIAL PRIMARY KEY,
-    cantidad_producto INT NOT NULL CHECK (cantidad_producto > 0),
-    fk_flujo INT NOT NULL,
-    fecha DATE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_produccion_flujo FOREIGN KEY (fk_flujo) REFERENCES Flujos(id)
-);
-CREATE INDEX idx_producciones_flujo ON Producciones(fk_flujo);
-CREATE INDEX idx_producciones_fecha ON Producciones(fecha);
-
-CREATE TABLE Metas (
-    id SERIAL PRIMARY KEY,
-    unidades INT NOT NULL CHECK (unidades > 0),
-    fk_producto INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_meta_producto FOREIGN KEY (fk_producto) REFERENCES Productos(id)
-);
-CREATE INDEX idx_metas_producto ON Metas(fk_producto);
-
+-- 13. Producciones_Detalles
 CREATE TABLE Producciones_Detalles (
     id SERIAL PRIMARY KEY,
     fk_produccion INT NOT NULL,
@@ -125,16 +151,3 @@ CREATE TABLE Producciones_Detalles (
 );
 CREATE INDEX idx_producciones_detalles_produccion ON Producciones_Detalles(fk_produccion);
 CREATE INDEX idx_producciones_detalles_meta ON Producciones_Detalles(fk_meta);
-
-CREATE TABLE Materiales_Productos (
-    id SERIAL PRIMARY KEY,
-    fk_material INT NOT NULL,
-    fk_producto INT NOT NULL,
-    cantidad INT NOT NULL DEFAULT 1 CHECK (cantidad > 0),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_material_producto_material FOREIGN KEY (fk_material) REFERENCES Materiales(id),
-    CONSTRAINT fk_material_producto_producto FOREIGN KEY (fk_producto) REFERENCES Productos(id)
-);
-CREATE INDEX idx_materiales_productos_material ON Materiales_Productos(fk_material);
-CREATE INDEX idx_materiales_productos_producto ON Materiales_Productos(fk_producto);
