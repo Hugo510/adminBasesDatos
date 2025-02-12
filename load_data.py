@@ -65,7 +65,8 @@ def get_files_and_tables() -> Dict[str, str]:
         "Producciones.csv": "Producciones",
         "Metas.csv": "Metas",
         "Producciones_Detalles.csv": "Producciones_Detalles",
-        "Materiales_Productos.csv": "Materiales_Productos"
+        "Materiales_Productos.csv": "Materiales_Productos",
+        "Productos_Flujos.csv": "Productos_Flujos"  # Línea agregada para la tabla Productos_Flujos
     }
 
 def load_csv_to_db(conn, file_path: Path, table: str) -> None:
