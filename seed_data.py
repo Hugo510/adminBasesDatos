@@ -58,7 +58,7 @@ def create_dataframe(data: Dict[str, Any], filename: str) -> Optional[pd.DataFra
         logging.error(f"Error al crear o guardar {filename}: {e}")
         return None
 
-# Definir cantidades de registros por tabla
+# Definir cantidades de registros por tabla (actualizado)
 COUNTS = {
     "Materiales": 700,
     "Productos": 700,
@@ -71,7 +71,8 @@ COUNTS = {
     "Producciones": 700,
     "Metas": 700,
     "Producciones_Detalles": 700,
-    "Materiales_Productos": 700
+    "Materiales_Productos": 700,
+    "Productos_Flujos": 700  # Registro agregado para la tabla Productos_Flujos
 }
 
 # Generando datasets para todas las tablas
@@ -203,6 +204,25 @@ def generate_materiales_productos(count: int, materiales_df: pd.DataFrame, produ
     }
     return create_dataframe(materiales_productos, "Materiales_Productos.csv")
 
+def generate_productos_flujos(count: int, productos_df: pd.DataFrame, flujos_df: pd.DataFrame) -> Optional[pd.DataFrame]:
+    """
+    Genera datos simulados para la tabla Productos_Flujos y los guarda en un archivo CSV.
+    
+    :param count: Número de registros a generar.
+    :param productos_df: DataFrame con los registros de la tabla Productos.
+    :param flujos_df: DataFrame con los registros de la tabla Flujos.
+    :return: DataFrame creado o None en caso de error.
+    """
+    productos_flujos = {
+        "id": range(1, count + 1),
+        "fk_producto": [random.choice(list(productos_df["id"])) for _ in range(count)],
+        "fk_flujo": [random.choice(list(flujos_df["id"])) for _ in range(count)],
+        "created_at": [random_timestamp() for _ in range(count)],
+        "updated_at": [random_timestamp() for _ in range(count)],
+    }
+    return create_dataframe(productos_flujos, "Productos_Flujos.csv")
+
+
 def main() -> None:
     """
     Función principal que gestiona la generación de datos y creación de archivos CSV.
@@ -246,6 +266,10 @@ def main() -> None:
         
         materiales_productos_df = generate_materiales_productos(COUNTS["Materiales_Productos"], materiales_df, productos_df)
         record_counts["Materiales_Productos"] = len(materiales_productos_df) if materiales_productos_df is not None else 0
+
+        # Generar datos para la tabla Productos_Flujos
+        productos_flujos_df = generate_productos_flujos(COUNTS["Productos_Flujos"], productos_df, flujos_df)
+        record_counts["Productos_Flujos"] = len(productos_flujos_df) if productos_flujos_df is not None else 0
         
         logging.info("Generación de datos completada.")
     except Exception as e:
