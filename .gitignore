@@ -2,3 +2,4 @@
 # ...existing code...
 .env
 *.log
+.qodo
