@@ -94,6 +94,7 @@ tu_repositorio/
 │   ├── Producciones_Detalles.csv
 │   └── Materiales_Productos.csv
 ├── populate.py
+├── load_data_mongodb.py
 └── README.md
 ```
 
@@ -244,6 +245,35 @@ Se asegura el cierre adecuado de recursos mediante el uso de gestores de context
 - **Eficiencia**: El uso de `pathlib` y un pool de conexiones simplifica la gestión de rutas y mejora el rendimiento al manejar conexiones.
 - **Trazabilidad**: El logging detallado permite un seguimiento efectivo de las operaciones y facilita la identificación y resolución de problemas.
 - **Escalabilidad**: La modularidad y el manejo eficiente de conexiones permiten que el sistema escale fácilmente para manejar mayores volúmenes de datos.
+
+## Mejoras Implementadas en `load_data_mongodb.py`
+
+### Carga de Datos en MongoDB
+
+El script `load_data_mongodb.py` ha sido desarrollado para cargar los datos generados en archivos CSV a una base de datos MongoDB, ofreciendo una alternativa NoSQL al almacenamiento relacional.
+
+### Características Principales
+
+- **Conexión a MongoDB**: Establece conexión con una base de datos MongoDB usando variables de entorno seguras.
+- **Carga Masiva de Datos**: Permite cargar múltiples archivos CSV en sus respectivas colecciones.
+- **Estructura Modular**: Organiza el código en funciones específicas que mejoran la legibilidad y mantenibilidad.
+- **Manejo de Excepciones**: Implementa un sistema robusto de manejo de errores para diferentes tipos de excepciones.
+- **Logging Detallado**: Registra todas las operaciones en un archivo de log dedicado (`mongodb_insert.log`).
+
+### Requisitos Adicionales
+
+- **Bibliotecas Python**:
+  - `pymongo`: Para conectar con bases de datos MongoDB.
+  - `python-dotenv`: Para cargar variables de entorno desde un archivo `.env`.
+
+### Configuración del Entorno
+
+El script requiere las siguientes variables de entorno para funcionar correctamente:
+
+- `MONGO_URI`: URI de conexión a MongoDB (ejemplo: `mongodb://localhost:27017`)
+- `MONGO_DB`: Nombre de la base de datos
+
+Estas variables deben definirse en un archivo `.env` en el directorio raíz del proyecto.
 
 ## Buenas Prácticas Implementadas
 
